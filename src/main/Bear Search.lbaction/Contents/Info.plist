@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>Bear-Icon.png</string>
+	<key>CFBundleIdentifier</key>
+	<string>dev.tkjt.LaunchBar.BearSearch</string>
+	<key>CFBundleName</key>
+	<string>Bear Search</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LBAbbreviation</key>
+	<string>bs bsearch</string>
+	<key>LBAssociatedApplication</key>
+	<string>net.shinyfrog.bear</string>
+	<key>LBDescription</key>
+	<dict>
+		<key>LBAuthor</key>
+		<string>Teemu Turpeinen</string>
+		<key>LBEmail</key>
+		<string></string>
+		<key>LBSummary</key>
+		<string>Searches for the defined string in Bear notes title and content by querying the SQLite database of Bear Notes. Encrypted, Archived and Trashed notes are excluded.</string>
+		<key>LBTwitter</key>
+		<string>ttur</string>
+	</dict>
+	<key>LBRequiredApplication</key>
+	<string>net.shinyfrog.bear</string>
+	<key>LBScripts</key>
+	<dict>
+		<key>LBDefaultScript</key>
+		<dict>
+			<key>LBAcceptedArgumentTypes</key>
+			<array>
+				<string>string</string>
+			</array>
+			<key>LBKeepWindowActive</key>
+			<true/>
+			<key>LBLiveFeedbackEnabled</key>
+			<true/>
+			<key>LBRequiresArgument</key>
+			<true/>
+			<key>LBResultType</key>
+			<string>unknown</string>
+			<key>LBReturnsResult</key>
+			<true/>
+			<key>LBScriptName</key>
+			<string>default.py</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
