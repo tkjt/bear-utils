@@ -28,7 +28,7 @@ def search():
     notes: list = []
 
     if query is not None and query != "":
-        qbase: str = "SELECT ZTITLE, ZUNIQUEIDENTIFIER FROM ZSFNOTE " \
+        query_base: str = "SELECT ZTITLE, ZUNIQUEIDENTIFIER FROM ZSFNOTE " \
                      "WHERE ZTRASHED = 0 AND ZARCHIVED = 0 AND ZENCRYPTED = 0"
 
         title_limit: str = ""
@@ -78,7 +78,7 @@ def search():
             title_limit += ")"
             text_limit += ")"
 
-        query = qbase + " AND (" + title_limit.strip() + ") OR (" + text_limit.strip() + ")"
+        query = query_base + " AND (" + title_limit.strip() + ") OR (" + text_limit.strip() + ")"
 
         with sqlite3.connect(bear_db) as conn:
             conn.row_factory = sqlite3.Row
