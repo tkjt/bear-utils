@@ -8,7 +8,6 @@ import sqlite3
 import sys
 import json
 import os
-import re
 
 HOME = os.getenv('HOME', '')
 bear_base: str = os.path.join(HOME, 'Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data')
