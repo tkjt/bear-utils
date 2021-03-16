@@ -14,8 +14,8 @@
 
 use strict ;
 use warnings;
-use File::Basename; 
 use Digest::SHA qw(sha256_hex) ;
+use File::Basename; 
 use File::Compare ;
 use File::Copy ;
 use File::Path qw(make_path);
@@ -24,17 +24,21 @@ use Getopt::Long ;
 
 my $links = () ;
 my %blocks = () ;
-my %opt = () ;
+my %opt = (
+	link_preference => 'title'
+) ;
 my %md_files = () ;
 
 # What character in a link to identify as a heading separator. In Bear this is a slash, ie. '/'.
-my $heading_separator = '/' ;
+my $hs = '/' ;
 
 GetOptions(
-	"d=s" => \$opt{dir},
-	"b=s" => \$opt{backup_dir},
-	"v" => \$opt{verbose},
-	"r" => \$opt{recursive}
+	"d=s"  => \$opt{dir},
+	"b=s"  => \$opt{backup_dir},
+	"v"    => \$opt{verbose},
+	"r"    => \$opt{recursive},
+	"l=s"  => \$opt{link_preference},
+	"hs=s" => \$hs
 	) or _help() ;
 
 _prepare() ;
@@ -47,9 +51,12 @@ _info("Completed") ;
 # Helper subs
 #
 sub _help {
-	print "usage: $0 -d /path/to/directory [-b /path/to/backup_directory] [-v] [-r]\n" ;
+	print "usage: $0 -d /path/to/directory [-b /path/to/backup_directory] [-v] [-r] [-l title|name] [-hs char]\n" ;
 	print "-v = verbose output\n" ;
 	print "-r = recursive search from defined folder. Default is to search 1 level only.\n" ;
+	print "-l   defines if we should read the link target from filename or the title of the document\n" ;
+	print "     defaults to 'title'\n" ;
+	print "-hs  defines a separator character for sub heading links. Defaults to '/'\n" ;
 	exit ;
 }
 
@@ -72,6 +79,16 @@ sub _prepare {
 	}
 
 	$opt{backup_dir} =~ s/\/+$// if $opt{backup_dir};
+
+	if ($opt{link_preference} !~ /^(title|name)$/) {
+		print "ERROR: link_preference should be either 'title' or 'name'\n" ;
+		exit 1;
+	}
+	
+	if (length($hs) > 1 || $hs =~ /[a-zA-Z0-9]/) {
+		print "ERROR: -hs should be a single character and not a letter or a number\n" ;
+		exit 1;
+	}
 }
 
 sub _backup {
@@ -118,6 +135,7 @@ sub _collect_backlinks {
 
 		# If multiple files with same name, this only includes the last one
 		$md_files{$file_name}->{full_path} = $full_path ;
+		$md_files{$file_name}->{link} = $file_name ;
 	}
 
 	_info("Collecting backlinks") ;
@@ -134,6 +152,7 @@ sub _collect_backlinks {
 		}
 
 		if (open(F, "$_")) {
+            my $first_line = "" ;
 			$file_cnt++;
 			my $file_name = basename($_) ;
 			$file_name =~ s/\.md$// ;
@@ -141,6 +160,14 @@ sub _collect_backlinks {
 			my $in_backlinks = "";
 			while(<F>) {
 				chomp ;
+                
+                if (! $first_line) {
+                    $first_line = $_ ;
+                    $first_line =~ s/^#\s+// ;
+                    if ($opt{link_preference} eq 'title' && $first_line !~ /^$file_name/) {
+                        $md_files{$file_name}->{link} = $first_line ;
+                    }
+                }
 
 				if (/^## Backlinks/) {
 					$in_backlinks = 1 ;
@@ -153,8 +180,8 @@ sub _collect_backlinks {
 							my $link = $_ ;
 							while ($link =~ /\[\[([^\]]*)\]\]/g) {
 								my $current_link = $1 ;
-								if ($current_link =~ /$heading_separator/) {
-									my @tmp = split($heading_separator, $current_link) ;
+								if ($current_link =~ /$hs/) {
+									my @tmp = split($hs, $current_link) ;
 									$current_link = $tmp[0] ;
 								}
 
@@ -183,7 +210,7 @@ sub _create_link_blocks {
 		my $link = $links->{$_};
 		foreach (sort keys %{$link}) {
 			my $t = $_ ;
-			$block .= "- [[$t]]\n" ;
+			$block .= "- [[$md_files{$t}->{link}]]\n" ;
 			my $l = $link->{$t} ;
 			foreach (sort keys %{$l}) {
 				my $s = $_ ;
