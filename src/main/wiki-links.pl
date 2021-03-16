@@ -163,10 +163,13 @@ sub _collect_backlinks {
                 
                 if (! $first_line) {
                     $first_line = $_ ;
-                    $first_line =~ s/^#\s+// ;
-                    if ($opt{link_preference} eq 'title' && $first_line !~ /^$file_name/) {
-                        $md_files{$file_name}->{link} = $first_line ;
-                    }
+
+					if ($first_line =~ /^#\s+/) {
+						$first_line =~ s/^#\s+//;
+						if ($opt{link_preference} eq 'title' && $first_line !~ /^$file_name/) {
+							$md_files{$file_name}->{link} = $first_line;
+						}
+					}
                 }
 
 				if (/^## Backlinks/) {
