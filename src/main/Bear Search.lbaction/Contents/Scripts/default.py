@@ -8,10 +8,12 @@ import sqlite3
 import sys
 import json
 import os
+import re
 
 HOME = os.getenv('HOME', '')
 bear_base: str = os.path.join(HOME, 'Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data')
 bear_db: str = os.path.join(bear_base, 'database.sqlite')
+search_str: list = []
 
 
 def clear_filter(filter_str: str, suffix: str) -> str:
@@ -24,6 +26,7 @@ def clear_filter(filter_str: str, suffix: str) -> str:
 
 
 def construct_query(query_opt: list) -> dict:
+    global search_str
     in_limit: bool = False
     title_limit: str = ""
     text_limit: str = ""
@@ -45,6 +48,7 @@ def construct_query(query_opt: list) -> dict:
 
             in_limit = True
         elif i != "":
+            search_str.append(i)
             if in_limit:
                 title_limit += "ZTITLE like \'%" + i + "%\' " + query_filter + " "
                 text_limit += "ZTEXT like \'%" + i + "%\' " + query_filter + " "
@@ -75,7 +79,7 @@ def search():
         if len(query) < 3:
             return
 
-        query_base: str = "SELECT ZTITLE, ZUNIQUEIDENTIFIER FROM ZSFNOTE " \
+        query_base: str = "SELECT ZTITLE, ZUNIQUEIDENTIFIER, ZTEXT FROM ZSFNOTE " \
                           "WHERE ZTRASHED = 0 AND ZARCHIVED = 0 AND ZENCRYPTED = 0"
 
         if query.endswith("AND") or query.endswith("OR"):
@@ -91,7 +95,32 @@ def search():
             c = conn.execute(query)
 
         for row in c:
-            note: dict = {'icon': 'Bear-Icon.png', 'title': row['ZTITLE'],
+            note_text: str = row['ZTEXT'].replace("\n", ' ')
+            sub_title: str = ""
+
+            for s in search_str:
+                if s != "":
+                    check_str = re.search(r'%s' % s, note_text, re.IGNORECASE)
+
+                    if check_str is not None:
+                        beg: int = check_str.span()[0] - 12
+                        end: int = check_str.span()[1] + 12
+
+                        txt: str = note_text[beg: end]
+                        while not re.match(r"^\W", txt, re.IGNORECASE) and not note_text.startswith(s) and beg > 0:
+                            beg -= 1
+                            txt = note_text[beg: end]
+
+                        while not re.search(r"\W$", txt, re.IGNORECASE) and not note_text.endswith(s) and end < len(note_text):
+                            end += 1
+                            txt = note_text[beg: end]
+
+                        sub_title += txt + " ... "
+
+            sub_title = sub_title[:-5]
+
+            note: dict = {'icon': 'Bear-Icon.png', 'title': row['ZTITLE'], 'subtitle': sub_title,
+                          'alwaysShowsSubtitle': 'true',
                           'url': 'bear://x-callback-url/open-note?new_window=yes&id=' + row['ZUNIQUEIDENTIFIER']}
             notes.append(note)
 
