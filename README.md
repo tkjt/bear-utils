@@ -15,10 +15,12 @@ You can use keyword `AND` in the beginning of the search to change the behaviour
 - `ansible update AND #secops` -> all notes matching `ansible` or `update` and `#secops`
 - `AND ansible update OR #secops` -> all notes matching `ansible` and `update` or `#secops`
 
+The search is case-insensitive.
+
 # wiki-links.pl
 Collects any `[[wiki links]]` found in Markdown files within the defined directory and adds or updates a `## Backlinks` -section containing all links pointing to the file.
 
-Links are kept in order so we do not need to update any files unless there has been changes in links.
+Links are kept in order, so we do not need to update any files unless there has been changes in links.
 
 ### References
 - Works well with https://github.com/andymatuschak/Bear-Markdown-Export
@@ -40,3 +42,7 @@ Use `-r` for a recursive search in the defined directory. The default is to sear
 
 ### Note!
 While this has been working well for me with the notes exported from Bear App, I highly recommend taking a backup of your files first!
+
+## Known issues
+When using the wiki-links -script with Bear Note export / import, sync conflicts may occur if you are updating a note for which the Backlinks are being updated at the same time.
+These will be displayed in Bear and you need to manually resolve.
