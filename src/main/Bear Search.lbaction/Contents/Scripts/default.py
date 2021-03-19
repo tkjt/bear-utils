@@ -69,6 +69,40 @@ def construct_query(query_opt: list) -> dict:
     return query
 
 
+def get_sub_title(criteria: list, note_text: str) -> str:
+    sub_title: str = ""
+    suffix: str = " ... "
+    
+    for s in criteria:
+        if s == "":
+            continue
+
+        check_str = re.search(r'%s' % s, note_text, re.IGNORECASE)
+
+        if check_str is None:
+            continue
+
+        beg: int = check_str.span()[0] - 12
+        end: int = check_str.span()[1] + 12
+
+        txt: str = note_text[beg: end]
+        while not re.match(r"^\W", txt, re.IGNORECASE) and not note_text.startswith(s) and beg > 0:
+            beg -= 1
+            txt = note_text[beg: end]
+
+        while not re.search(r"\W$", txt, re.IGNORECASE) and not note_text.endswith(s) and end < len(
+                note_text):
+            end += 1
+            txt = note_text[beg: end]
+
+        sub_title += txt + suffix
+
+    if len(sub_title) >= len(suffix):
+        sub_title = sub_title[:-len(suffix)]
+
+    return sub_title
+
+
 def search():
     query: str = " ".join(sys.argv[1:]).strip()
     notes: list = []
@@ -96,28 +130,7 @@ def search():
 
         for row in c:
             note_text: str = row['ZTEXT'].replace("\n", ' ')
-            sub_title: str = ""
-
-            for s in search_str:
-                if s != "":
-                    check_str = re.search(r'%s' % s, note_text, re.IGNORECASE)
-
-                    if check_str is not None:
-                        beg: int = check_str.span()[0] - 12
-                        end: int = check_str.span()[1] + 12
-
-                        txt: str = note_text[beg: end]
-                        while not re.match(r"^\W", txt, re.IGNORECASE) and not note_text.startswith(s) and beg > 0:
-                            beg -= 1
-                            txt = note_text[beg: end]
-
-                        while not re.search(r"\W$", txt, re.IGNORECASE) and not note_text.endswith(s) and end < len(note_text):
-                            end += 1
-                            txt = note_text[beg: end]
-
-                        sub_title += txt + " ... "
-
-            sub_title = sub_title[:-5]
+            sub_title: str = get_sub_title(search_str, note_text)
 
             note: dict = {'icon': 'Bear-Icon.png', 'title': row['ZTITLE'], 'subtitle': sub_title,
                           'alwaysShowsSubtitle': 'true',
