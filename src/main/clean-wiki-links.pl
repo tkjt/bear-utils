@@ -79,14 +79,14 @@ sub _remove_link_blocks {
             while (<F>) {
                 my $r = $_;
                 if ($r =~ /^## Backlinks/) {
-                    my $element = $blocks[-1] ;
-                    chomp($element) ;
+                    my $element = $blocks[-1];
+                    chomp($element);
                     while ($element =~ /^(---)?$/) {
-                        pop(@blocks) ;
-                        $element = $blocks[-1] ;
-                        chomp($element) ;
+                        pop(@blocks);
+                        $element = $blocks[-1];
+                        chomp($element);
                     }
-                    push(@blocks, "\n") ;
+                    push(@blocks, "\n");
                     $in_backlinks = 1;
                     next;
                 }
@@ -98,7 +98,7 @@ sub _remove_link_blocks {
                         push(@blocks, $r);
                     }
                     elsif (!$in_backlinks) {
-                        push(@blocks, $r) ;
+                        push(@blocks, $r);
                     }
                 }
             }
