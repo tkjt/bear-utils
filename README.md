@@ -5,6 +5,8 @@ This repository contains some utilities I am using with [Bear App](https://bear.
 Bear Search is an action for [LaunchBar](https://www.obdev.at/products/launchbar/index.html) which allows you to search quickly from Bear notes without opening Bear first.
 The action connects directly to Bear's SQLite database and provides realtime search results. Selecting a result opens the note in Bear.
 
+<img width="668" alt="Screenshot 2021-03-19 at 7 23 48" src="https://user-images.githubusercontent.com/12680397/111735163-39b29e80-8884-11eb-8970-cfa474e869b6.png">
+
 ### Search criteria
 The search always targets the Title and the Text of the note. By default, all notes matching any of the keywords are returned. A minimum of 3 characters must be typed.
 You can use keyword `AND` in the beginning of the search to change the behaviour to require a match for all criteria. Keywords `AND` and `OR` can also be used between search criteria.
@@ -21,6 +23,8 @@ The search is case-insensitive.
 Collects any `[[wiki links]]` found in Markdown files within the defined directory and adds or updates a `## Backlinks` -section containing all links pointing to the file.
 
 Links are kept in order, so we do not need to update any files unless there has been changes in links.
+
+<img width="1085" alt="Screenshot 2021-03-19 at 7 24 18" src="https://user-images.githubusercontent.com/12680397/111735182-433c0680-8884-11eb-8db4-df7d30181a7c.png">
 
 ### References
 - Works well with https://github.com/andymatuschak/Bear-Markdown-Export
