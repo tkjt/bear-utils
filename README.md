@@ -36,13 +36,18 @@ Perl
 ### Usage
 ```
 $ perl wiki-links.pl
-usage: wiki-links.pl -d /path/to/directory [-b /path/to/backup_directory] [-v] [-r]
+usage: ./wiki-links.pl -d /path/to/directory [-b /path/to/backup_directory] [-v] [-r] [-l title|name] [-hs char]
+-v = verbose output
+-r = recursive search from defined folder. Default is to search 1 level only.
+-l   defines if we should read the link target from filename or the title of the document
+     defaults to 'title'
+-hs  defines a separator character for sub heading links. Defaults to '/'
 ```
 
 If backup directory is defined with `-b`, any file that would be updated is first copied to the backup directory. If backup fails, changes are ignored.
 
 Use `-v` to get output from the script. Errors are always printed to `STDERR`.  
-Use `-r` for a recursive search in the defined directory. The default is to search one level only   
+Use `-r` for a recursive search in the defined directory. The default is to search one level only.
 
 ### Note!
 While this has been working well for me with the notes exported from Bear App, I highly recommend taking a backup of your files first!
