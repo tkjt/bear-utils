@@ -11,6 +11,7 @@ use File::Basename;
 use File::Compare;
 use POSIX qw(strftime);
 use Getopt::Long;
+use File::Copy;
 
 my $links = ();
 my %blocks = ();
