@@ -1,17 +1,19 @@
 #!/usr/bin/perl
 #
-# Clears ## Backlinks -section found from Markdown files.
+# Clears ## Backlinks -section found from Markdown files. Also removes tags and comments after Backlinks.
 #
 # Author: Teemu Turpeinen, 2021
 #
 
 use strict;
 use warnings;
+use Digest::SHA qw(sha256_hex);
 use File::Basename;
 use File::Compare;
+use File::Copy;
+use File::Path qw(make_path);
 use POSIX qw(strftime);
 use Getopt::Long;
-use File::Copy;
 
 my $links = ();
 my %blocks = ();
@@ -21,7 +23,9 @@ my %md_files = ();
 GetOptions(
     "d=s" => \$opt{dir},
     "v"   => \$opt{verbose},
-    "r"   => \$opt{recursive}
+    "r"   => \$opt{recursive},
+    "c"   => \$opt{comments},
+    "t"   => \$opt{tags}
 ) or _help();
 
 _prepare();
@@ -35,6 +39,8 @@ sub _help {
     print "usage: $0 -d /path/to/directory [-v] [-r]\n";
     print "-v = verbose output\n";
     print "-r = recursive search from defined folder. Default is to search 1 level only.\n";
+    print "-c = clean comments after backlinks\n" ;
+    print "-t = clean tags after backlinks\n" ;
     exit;
 }
 
@@ -76,30 +82,48 @@ sub _remove_link_blocks {
         if (open(F, $file)) {
             my @blocks = "";
             my $in_backlinks = "";
+            my $after_backlinks = "";
+            my $in_comment = "" ;
 
             while (<F>) {
                 my $r = $_;
                 if ($r =~ /^## Backlinks/) {
-                    my $element = $blocks[-1];
-                    chomp($element);
-                    while ($element =~ /^(---)?$/) {
-                        pop(@blocks);
-                        $element = $blocks[-1];
-                        chomp($element);
+                    my $element = $blocks[-1] ;
+                    chomp($element) ;
+                    while ($element =~ /^(---|- - - -|\s+)?$/) {
+                        pop(@blocks) ;
+                        $element = $blocks[-1] ;
+                        chomp($element) ;
                     }
-                    push(@blocks, "\n");
+                    push(@blocks, "\n") ;
                     $in_backlinks = 1;
+                    $after_backlinks = 1;
                     next;
                 }
                 else {
                     my $t = $r;
                     chomp($t);
-                    if ($in_backlinks && $t !~ /^(\s+)?-\s+/) {
+                    if ($in_backlinks && $t !~ /^(\s+)?(-|\*)\s+/) {
                         $in_backlinks = "";
+
+                        if ($opt{tags} && $t =~ /^#[a-zA-Z0-9]/) {
+                            next ;
+                        } 
+
+                        if ($opt{comments} && $t =~ /^(\s+)?<!--/) {
+                            $in_comment = 1 ;
+                            next ;
+                        }
+
+                        if ($opt{comments} && $in_comment && $t =~ /-->/) {
+                            $in_comment = "" ;
+                            next ;
+                        }
+
                         push(@blocks, $r);
                     }
                     elsif (!$in_backlinks) {
-                        push(@blocks, $r);
+                        push(@blocks, $r) ;
                     }
                 }
             }
